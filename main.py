@@ -42,10 +42,11 @@ class SevenSecondMatrixClass:
 
 
         #four important addresses for the user
-        self.subnet_id = None
-        self.broadcast_add = None
-        self.first_avaliable_host = None
-        self.last_avaliable_host = None
+        self.subnet_id = []
+        self.broadcast_add = []
+        self.first_avaliable_host = []
+        self.last_avaliable_host = []
+        self.delineation_val = None
     def is_valid_ip(self,address):
         try:
             split_address = address.split('/')
@@ -58,26 +59,58 @@ class SevenSecondMatrixClass:
             return False
   
     def calculate_subnetmask(self):
-        
         #Obtain CIDR notation postion on chart to help calculate the appropriate subnet mask
         for i in self.masks_col:
             if(self.CIDR_val == SevenSecondMatrix[i][7]):
                 self.CIDR_chart_row = 7
-                #Added one to get the appropriate 'octet'
-                self.CIDR_octet = i + 1
+                self.CIDR_octet = i
+                break
             elif(self.CIDR_val < SevenSecondMatrix[i][7]):
                 for j in range(7,-1, -1):
                     if (SevenSecondMatrix[i][j] == self.CIDR_val):
                         self.CIDR_chart_row = j
-                        #Added one to get the appropraite 'octet'
-                        self.CIDR_octet = i + 1
+                        self.CIDR_octet = i
+                        break
+        
 
-        print(f"should be on row:{self.CIDR_chart_row}")
-        print(f"on octet #: {self.CIDR_octet}")
-        return True
+        #Append 255 to all octets previous to the CIDR_octet
+        for x in range(self.CIDR_octet):
+            self.subnetmask.append(255)
 
+        #Append the Decimal Value from the SevenSecondMatrix    
+        self.subnetmask.append(SevenSecondMatrix[self.decimal_col][self.CIDR_chart_row])
+        
+        #Append 0 to all values after the CIDR_octet
+        for y in range(self.CIDR_octet+1,4):
+            self.subnetmask.append(0)
 
-               
+        print(self.subnetmask)
+        return True        
+
+    def calculate_networkaddr(self):
+        for i in range(len(self.subnetmask)):
+            if(self.subnetmask[i] == 255):
+                self.subnet_id.append(self.user_ip[i])
+            elif(self.subnetmask[i] == 0):
+                self.subnet_id.append(0)
+            else:
+                target = int(self.user_ip[i])
+                self.delineation_val = int(SevenSecondMatrix[self.maxhost_col][self.CIDR_chart_row])
+                print(target)
+                print(self.delineation_val)
+                val = self.delineation_val
+
+                while (val < 255):
+                    if (target < val):
+                        val -= self.delineation_val
+                        self.subnet_id.append(val)
+                        break
+                    else: 
+                        val += self.delineation_val
+
+        
+        print(self.subnet_id)
+
 
     def user_menu(self):
         while not self.valid:
@@ -89,8 +122,7 @@ class SevenSecondMatrixClass:
             print("Please  Try Again.")
 
         self.calculate_subnetmask()
-        
-    
+        self.calculate_networkaddr()
         
     def start (self):
         self.user_menu()
