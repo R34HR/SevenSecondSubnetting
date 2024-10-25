@@ -12,6 +12,7 @@ This project is meant to further my knowledge & skills in subnetting + Python
 ##############################################
 # Here we define the seven-second matrix to do our calculations
 # as well as all resepctive coloumns so we can have fixed access
+import keyboard
 SevenSecondMatrix = ((1,2,3,4,5,6,7,8),
     (9,10,11,12,13,14,15,16), 
     (17,18,19,20,21,22,23,24), 
@@ -44,8 +45,8 @@ class SevenSecondMatrixClass:
         #four important addresses for the user
         self.subnet_id = []
         self.broadcast_add = []
-        self.first_avaliable_host = []
-        self.last_avaliable_host = []
+        self.first_usable_host = []
+        self.last_usable_host = []
         self.delineation_val = None
     def is_valid_ip(self,address):
         try:
@@ -84,10 +85,10 @@ class SevenSecondMatrixClass:
         for y in range(self.CIDR_octet+1,4):
             self.subnetmask.append(0)
 
-        print(self.subnetmask)
+        print(f"Subnet mask: {self.subnetmask}")
         return True        
 
-    def calculate_networkaddr(self):
+    def calculate_subnetID(self):
         for i in range(len(self.subnetmask)):
             if(self.subnetmask[i] == 255):
                 self.subnet_id.append(self.user_ip[i])
@@ -96,8 +97,6 @@ class SevenSecondMatrixClass:
             else:
                 target = int(self.user_ip[i])
                 self.delineation_val = int(SevenSecondMatrix[self.maxhost_col][self.CIDR_chart_row])
-                print(target)
-                print(self.delineation_val)
                 val = self.delineation_val
 
                 while (val < 255):
@@ -107,11 +106,30 @@ class SevenSecondMatrixClass:
                         break
                     else: 
                         val += self.delineation_val
+        print(f"Subnet ID: {self.subnet_id}")
 
+    def calculate_broadcastaddr(self):
+        for i in range(len(self.subnetmask)):
+            if(self.subnetmask[i] == 255):
+                self.broadcast_add.append(self.user_ip[i])
+            elif(self.subnetmask[i] == 0):
+                self.broadcast_add.append(255)
+            else:
+                val = self.subnet_id[i] + self.delineation_val - 1
+                self.broadcast_add.append(val)
+
+        print(f"Brodcast Address: {self.broadcast_add}")
+
+
+    def calculate_usableAddr(self):
+        self.first_usable_host = self.subnet_id
+        self.first_usable_host[3] += 1
+
+        self.last_usable_host = self.broadcast_add
+        self.last_usable_host[3] -= 1
+        print(f"First Usable Host Address: {self.first_usable_host}")
+        print(f"Last Usable Host Address: {self.last_usable_host}")
         
-        print(self.subnet_id)
-
-
     def user_menu(self):
         while not self.valid:
             ipvaddress = (input("Please enter a valid IP address with CIDR notation:"))
@@ -122,9 +140,14 @@ class SevenSecondMatrixClass:
             print("Please  Try Again.")
 
         self.calculate_subnetmask()
-        self.calculate_networkaddr()
-        
+        self.calculate_subnetID()
+        self.calculate_broadcastaddr()
+        self.calculate_usableAddr()
     def start (self):
+        print("+----------------------------+")
+        print("Seven Second Subnetting Tool!")
+        print("+----------------------------+")
+
         self.user_menu()
 
 x = SevenSecondMatrixClass()
