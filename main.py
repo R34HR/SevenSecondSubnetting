@@ -57,6 +57,7 @@ class SevenSecondMatrixClass:
             valid = [b for b in valid if b >=0 and b <= 255]
             return len(valid)==4 and self.CIDR_val<=32     
         except:
+            print(f'{address}, is not a valid address. Please Try Again! \n')
             return False
   
     def calculate_subnetmask(self):
@@ -85,40 +86,51 @@ class SevenSecondMatrixClass:
         for y in range(self.CIDR_octet+1,4):
             self.subnetmask.append(0)
 
-        print(f"Subnet mask: {self.subnetmask}")
+        print('Subnet Mask: ', end='')
+        for x in range(len(self.subnetmask)-1):
+            print(f"{self.subnetmask[x]}", end='.')
+        print(f"{self.subnetmask[-1]}")
         return True        
 
     def calculate_subnetID(self):
         for i in range(len(self.subnetmask)):
             if(self.subnetmask[i] == 255):
-                self.subnet_id.append(self.user_ip[i])
+                self.subnet_id.append(int(self.user_ip[i]))
             elif(self.subnetmask[i] == 0):
                 self.subnet_id.append(0)
             else:
                 target = int(self.user_ip[i])
                 self.delineation_val = int(SevenSecondMatrix[self.maxhost_col][self.CIDR_chart_row])
                 val = self.delineation_val
-
-                while (val < 255):
+                # (val < 255)
+                while True:
                     if (target < val):
                         val -= self.delineation_val
-                        self.subnet_id.append(val)
+                        self.subnet_id.append(int(val))
                         break
                     else: 
                         val += self.delineation_val
-        print(f"Subnet ID: {self.subnet_id}")
+        
+        print('Subnet ID: ', end='')
+        for x in range(len(self.subnet_id)-1):
+            print(f"{self.subnet_id[x]}", end='.')
+        print(f"{self.subnet_id[-1]}")
 
     def calculate_broadcastaddr(self):
         for i in range(len(self.subnetmask)):
             if(self.subnetmask[i] == 255):
-                self.broadcast_add.append(self.user_ip[i])
+                self.broadcast_add.append(int(self.user_ip[i]))
             elif(self.subnetmask[i] == 0):
                 self.broadcast_add.append(255)
             else:
                 val = self.subnet_id[i] + self.delineation_val - 1
-                self.broadcast_add.append(val)
+                self.broadcast_add.append(int(val))
 
-        print(f"Brodcast Address: {self.broadcast_add}")
+        print('Broadcast Address: ', end='')
+        for x in range(len(self.broadcast_add)-1):
+            print(f"{self.broadcast_add[x]}", end='.')
+        print(f"{self.broadcast_add[-1]}")
+        # print(f"Brodcast Address: {self.broadcast_add}")
 
 
     def calculate_usableAddr(self):
@@ -127,8 +139,17 @@ class SevenSecondMatrixClass:
 
         self.last_usable_host = self.broadcast_add
         self.last_usable_host[3] -= 1
-        print(f"First Usable Host Address: {self.first_usable_host}")
-        print(f"Last Usable Host Address: {self.last_usable_host}")
+
+        # Prints the first usable address of a subnet.
+        print('First usable subnet address: ', end='')
+        for x in range(len(self.first_usable_host)-1):
+            print(f"{self.first_usable_host[x]}", end='.')
+        print(f"{self.first_usable_host[-1]}")
+
+        print('Last usable subnet Address: ', end='')
+        for x in range(len(self.last_usable_host)-1):
+            print(f"{self.last_usable_host[x]}", end='.')
+        print(f"{self.last_usable_host[-1]}")
         
     def user_menu(self):
         while not self.valid:
